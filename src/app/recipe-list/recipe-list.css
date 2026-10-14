@@ -1,0 +1,33 @@
+.recipes {
+  max-width: 40rem;
+}
+
+.recipes__title {
+  margin: 0 0 1rem;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.recipes__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+}
+
+.recipes__item {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+}
+
+.recipes__item + .recipes__item {
+  border-top: 1px solid #e5e7eb;
+}
+
+.recipes__time {
+  color: #6b7280;
+}

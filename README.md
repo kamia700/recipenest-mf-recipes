@@ -9,7 +9,7 @@ remote micro-frontend (`recipe-nest-mf-recipes`) via Webpack Module Federation
 | Project | Role | Port | URL |
 |---|---|---|---|
 | `recipe-nest-shell` | Host — layout (header/sidebar), routing, remote loader | 4200 | http://localhost:4200 |
-| `recipenest-mf-recipes` | Remote — exposes `./Component` from `src/app/app.ts` | 4201 | http://localhost:4201 |
+| `recipenest-mf-recipes` | Remote — exposes `./Routes` from `src/app/app.routes.ts` | 4201 | http://localhost:4201 |
 
 These are two independent repos (own `.git`, `angular.json`, `package.json`) —
 there's no single command that starts both.
@@ -35,7 +35,8 @@ npm start         # http://localhost:4200
 ```
 
 Open **http://localhost:4200** — it redirects to `/recipes`, which loads the
-remote's `App` component into the shell's layout at runtime.
+remote's routes (currently a recipe list page) into the shell's layout at
+runtime.
 
 Both dev servers run in watch mode — edit source files in either project and
 they hot-rebuild automatically. Config file changes (`webpack.config.js`,
@@ -43,24 +44,29 @@ they hot-rebuild automatically. Config file changes (`webpack.config.js`,
 
 ## How it works
 
-- `recipe-nest-shell/src/app/app.routes.ts` lazy-loads the remote via
-  `loadRemoteModule({ remoteEntry: 'http://localhost:4201/remoteEntry.js', exposedModule: './Component' })`
-  on the `/recipes` route.
-- `recipenest-mf-recipes/webpack.config.js` exposes its root `App` component
-  as `./Component`.
+Detailed walkthrough (in Russian):
+[recipe-nest-shell/docs/module-federation.md](../recipe-nest-shell/docs/module-federation.md).
+
+- `recipe-nest-shell/public/mf.manifest.json` maps the remote name `recipes`
+  to `http://localhost:4201/remoteEntry.js`; the shell reads it via
+  `initFederation` in `src/main.ts` before bootstrapping.
+- `recipe-nest-shell/src/app/app.routes.ts` lazy-loads the remote on the
+  `/recipes` route via `loadRemoteChildren('recipes', './Routes', 'routes')`.
+- `recipenest-mf-recipes/webpack.config.js` exposes `src/app/app.routes.ts`
+  as `./Routes`. Paths there are relative, so the remote owns its own pages
+  under `/recipes/*`; the same routes are used when it runs standalone.
 - Angular/RxJS/Router are shared as singletons between host and remote
   (`shareAll` in both `webpack.config.js` files) to avoid duplicate framework
   instances.
 
 ## Known limitations
 
-- Remote URLs are hardcoded to `localhost` — no manifest/env-based remote
-  discovery for other environments.
-- No error/fallback UI if the remote fails to load.
-- Shell also declares a `shopping` remote (port 4202) with no corresponding
-  project — `/shopping` will fail to load.
-- `recipenest-mf-recipes` still ships default Angular CLI placeholder
-  content — no real "recipes" feature yet.
+- The shell's `mf.manifest.json` only has `localhost` URLs — swap it per
+  environment at deploy time.
+- `/shopping` has no project or manifest entry yet — the shell shows its
+  "module unavailable" fallback there.
+- `recipenest-mf-recipes` only has a static recipe list — no real data or
+  detail pages yet.
 
 This is a working dev setup for exercising Module Federation, not a
 production-hardened reference architecture.

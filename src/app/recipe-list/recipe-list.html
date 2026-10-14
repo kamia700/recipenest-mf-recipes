@@ -1,0 +1,14 @@
+<section class="recipes">
+  <h1 class="recipes__title">Рецепты</h1>
+
+  <ul class="recipes__list">
+    @for (recipe of recipes(); track recipe.id) {
+      <li class="recipes__item">
+        <span>{{ recipe.title }}</span>
+        <span class="recipes__time">{{ recipe.minutes }} мин</span>
+      </li>
+    } @empty {
+      <li class="recipes__item">Рецептов пока нет</li>
+    }
+  </ul>
+</section>
